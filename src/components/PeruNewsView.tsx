@@ -96,10 +96,8 @@ export const PeruNewsView: React.FC<PeruNewsViewProps> = ({
 
   // Filtrar exclusivamente noticias peruanas, ordenadas cronológicamente
   const allPeruNews = useMemo(() => {
-    const combined = [
-      ...ORIGINAL_REPORTS,
-      ...news.filter((n) => n.section === 'peru' && !ORIGINAL_REPORTS.some((r) => r.id === n.id)),
-    ];
+    const livePeru = news.filter((n) => n.section === "peru" && !ORIGINAL_REPORTS.some((r) => r.id === n.id));
+    const combined = [...livePeru, ...ORIGINAL_REPORTS];
     return combined.sort((a, b) => {
       const timeA = new Date(a.publishedAt).getTime() || 0;
       const timeB = new Date(b.publishedAt).getTime() || 0;

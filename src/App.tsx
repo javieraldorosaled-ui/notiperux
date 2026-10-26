@@ -154,10 +154,11 @@ export function App() {
     const unsubNews = subscribeToHuanucoNews((payload) => {
       if (Array.isArray(payload.items) && payload.items.length > 0) {
         // Combinar reportes originales de NotiPerúx con los del feed en vivo
+        const live = payload.items || [];
         const combined = [
-          ...ORIGINAL_REPORTS,
-          ...payload.items.filter((it) => !ORIGINAL_REPORTS.some((r) => r.id === it.id)),
-        ];
+          ...live,
+          ...ORIGINAL_REPORTS.filter((r) => !live.some((it) => it.id === r.id)),
+        ].sort((a, b) => (new Date(b.publishedAt).getTime() || 0) - (new Date(a.publishedAt).getTime() || 0));
         setNews(combined);
         speechManager.preloadTopNews(combined);
       } else {
@@ -380,10 +381,11 @@ export function App() {
       setIsNewsLoading(true);
       const res = await triggerManualNewsSync();
       if (Array.isArray(res.items) && res.items.length > 0) {
+        const live = res.items || [];
         const combined = [
-          ...ORIGINAL_REPORTS,
-          ...res.items.filter((it) => !ORIGINAL_REPORTS.some((r) => r.id === it.id)),
-        ];
+          ...live,
+          ...ORIGINAL_REPORTS.filter((r) => !live.some((it) => it.id === r.id)),
+        ].sort((a, b) => (new Date(b.publishedAt).getTime() || 0) - (new Date(a.publishedAt).getTime() || 0));
         setNews(combined);
       }
       if (Array.isArray(res.sources)) {
