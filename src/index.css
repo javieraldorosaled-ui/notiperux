@@ -1,0 +1,166 @@
+@import "tailwindcss";
+
+@layer base {
+  html, body {
+    background-color: #000000;
+    color: #FFFFFF;
+    font-family: 'Times New Roman', Times, serif;
+    -webkit-tap-highlight-color: transparent;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    overflow-x: hidden;
+  }
+}
+
+/* Ocultar barras de scroll secundarias/internas */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Tipografía Editorial Refinada */
+.font-newspaper {
+  font-family: 'Playfair Display', 'Times New Roman', serif;
+}
+
+.border-newspaper {
+  border: 1.5px solid #FFFFFF;
+}
+
+.border-newspaper-thick {
+  border: 3px solid #FFFFFF;
+}
+
+.border-newspaper-double {
+  border-top: 4px double #FFFFFF;
+  border-bottom: 4px double #FFFFFF;
+}
+
+/* Contenedor / Relieve Principal */
+.product-card-shell {
+  background-color: #000000;
+  border: 1px solid #FFFFFF;
+}
+
+/* Redefinir botones glossy para ser minimalistas si se siguen usando en algún lugar */
+.btn-peru, .btn-internacional, .btn-perfil, .btn-kiosko {
+  background: #000000 !important;
+  border: 1px solid #FFFFFF !important;
+  color: #FFFFFF !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  font-family: serif !important;
+}
+
+.btn-peru:before, .btn-internacional:before, .btn-perfil:before, .btn-kiosko:before,
+.peru-shine, .brillo, .brillo-perfil, .brillo-kiosko,
+.destello, .destello-perfil, .destello-kiosko {
+  display: none !important;
+}
+
+/* Botones de acción compactos (LEER MÁS) */
+.btn-leer-mas {
+  background: #FFFFFF !important;
+  border: 1px solid #FFFFFF !important;
+  color: #000000 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  height: 26px !important;
+  padding: 0 9px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+/* Botón de Escuchar Audio destacado y visible */
+.btn-audio {
+  background: #065f46 !important;
+  border: 1px solid #FFFFFF !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 2px 8px rgba(6, 95, 70, 0.5) !important;
+  border-radius: 0 !important;
+  height: 26px !important;
+  padding: 0 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+.btn-leer-mas:before, .btn-audio:before,
+.btn-leer-mas:after, .btn-audio:after,
+.shine, .audio-shine {
+  display: none !important;
+}
+
+.btn-icon, .btn-arrow {
+  background: transparent !important;
+  border-radius: 0 !important;
+  color: #000000 !important;
+  border: none !important;
+  box-shadow: none !important;
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+}
+
+.audio-icon, .audio-arrow {
+  background: transparent !important;
+  border-radius: 0 !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  box-shadow: none !important;
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+}
+
+.btn-icon svg, .btn-arrow svg {
+  width: 10px !important;
+  height: 10px !important;
+}
+
+.audio-icon svg, .audio-arrow svg {
+  width: 10px !important;
+  height: 10px !important;
+  color: #FFFFFF !important;
+  stroke: #FFFFFF !important;
+  fill: #FFFFFF !important;
+}
+
+.btn-text {
+  color: #000000 !important;
+  text-shadow: none !important;
+  font-size: 9px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.05em !important;
+}
+
+.audio-text {
+  color: #FFFFFF !important;
+  text-shadow: none !important;
+  font-size: 9px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.08em !important;
+}
+
+/* Badge Notiperux Destacada */
+.btn-notiperux-destacada {
+  background: #FFFFFF !important;
+  color: #000000 !important;
+  border-radius: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.texto-destacada {
+  color: #000000 !important;
+  text-shadow: none !important;
+}
+
+.brillo-destacada, .destello-destacada {
+  display: none !important;
+}

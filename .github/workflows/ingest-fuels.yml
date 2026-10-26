@@ -1,0 +1,48 @@
+name: Osinergmin Fuels Ingestion Pipeline
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  ingest:
+    name: Sincronizar Osinergmin con Firestore
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm ci || npm install
+
+      - name: Descargar Osinergmin y Escribir en Firestore (Directo)
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "================================================================="
+            echo "ERROR CRÍTICO: Falta el secreto FIREBASE_SERVICE_ACCOUNT en GitHub"
+            echo "Para escribir directamente en Firestore necesitas configurar este secreto."
+            echo "================================================================="
+            exit 1
+          fi
+
+          npx tsx scripts/ingest-osinergmin.ts
+
+      - name: Publicar copia de respaldo en el repositorio
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/fuels-huanuco.json
+          git commit -m "Auto-sync Osinergmin Firestore: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" || echo "Sin cambios nuevos para commitear"
+          git push

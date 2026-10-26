@@ -1,0 +1,8 @@
+{
+  "name": "NotiperuX - Noticias de Perú y el Mundo",
+  "description": "Todas las noticias del Perú y del mundo, en audio y escrito en una sola web.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

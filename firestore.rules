@@ -1,0 +1,76 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Lectura pública de productos, combustibles y ofertas publicadas
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if false; // Solo administradores o procesos verificados
+    }
+
+    match /fuelStations/{stationId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /offers/{offerId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /sources/{sourceId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /updates/{updateId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /news/{newsId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /newsSources/{sourceId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Reportes de la comunidad: cualquiera puede enviar un reporte siempre que entre como 'pending' o 'PENDIENTE'
+    match /priceReports/{reportId} {
+      allow read: if true;
+      allow create: if (request.resource.data.status == 'pending' || request.resource.data.status == 'PENDIENTE')
+                    && request.resource.data.product is string
+                    && request.resource.data.price is number
+                    && request.resource.data.storeName is string;
+      allow update, delete: if false; // Moderación requerida por proceso administrativo
+    }
+
+    // Estadísticas y contador de visitas públicas de NotiPerúx
+    match /stats/{statId} {
+      allow read: if true;
+      allow create, update: if (statId == 'global' || statId == 'visits')
+                            && (
+                              !('totalVisits' in request.resource.data) ||
+                              request.resource.data.totalVisits is number
+                            )
+                            && (
+                              !('installedApps' in request.resource.data) ||
+                              request.resource.data.installedApps is number
+                            )
+                            && (
+                              !('registeredUsers' in request.resource.data) ||
+                              request.resource.data.registeredUsers is number
+                            );
+      allow delete: if false;
+    }
+
+    // Perfiles de usuarios registrados
+    match /users/{userId} {
+      allow read: if true;
+      allow create, update: if request.auth != null && request.auth.uid == userId;
+      allow delete: if false;
+    }
+  }
+}

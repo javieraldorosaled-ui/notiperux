@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450" fill="none">
+  <defs>
+    <linearGradient id="bgMundo" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F2B48"/>
+      <stop offset="50%" stop-color="#1E3A5F"/>
+      <stop offset="100%" stop-color="#0B1B30"/>
+    </linearGradient>
+    <linearGradient id="globeBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#0284C7"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#bgMundo)"/>
+  <circle cx="400" cy="210" r="140" fill="#ffffff" fill-opacity="0.04"/>
+  <circle cx="400" cy="210" r="100" fill="#ffffff" fill-opacity="0.06"/>
+  <!-- Globe / World icon -->
+  <g transform="translate(400, 190)">
+    <circle cx="0" cy="0" r="42" stroke="url(#globeBlue)" stroke-width="3" fill="#0C233C" fill-opacity="0.8"/>
+    <ellipse cx="0" cy="0" rx="20" ry="42" stroke="#7DD3FC" stroke-width="2" stroke-opacity="0.6"/>
+    <line x1="-42" y1="0" x2="42" y2="0" stroke="#7DD3FC" stroke-width="2" stroke-opacity="0.6"/>
+    <line x1="-34" y1="-20" x2="34" y2="-20" stroke="#7DD3FC" stroke-width="1.5" stroke-opacity="0.5"/>
+    <line x1="-34" y1="20" x2="34" y2="20" stroke="#7DD3FC" stroke-width="1.5" stroke-opacity="0.5"/>
+  </g>
+  <!-- Text -->
+  <text x="400" y="295" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="700" fill="#FFFFFF" text-anchor="middle" letter-spacing="1">NOTICIAS INTERNACIONALES</text>
+  <text x="400" y="325" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="500" fill="#93C5FD" text-anchor="middle" letter-spacing="0.5">PANORAMA GLOBAL · FUENTE VERIFICADA</text>
+</svg>

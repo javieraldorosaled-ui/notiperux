@@ -1,0 +1,107 @@
+{
+  "entities": {
+    "Product": {
+      "fields": {
+        "id": { "type": "string", "description": "Identificador único" },
+        "name": { "type": "string", "description": "Nombre del producto" },
+        "currentPrice": { "type": "number", "description": "Precio actual en soles" },
+        "previousPrice": { "type": "number", "description": "Precio anterior en soles" },
+        "source": { "type": "string", "description": "Fuente oficial o comunitaria" },
+        "sourceUrl": { "type": "string", "description": "Enlace a la fuente" },
+        "updatedAt": { "type": "string", "description": "Fecha y hora de actualización ISO" },
+        "verificationStatus": { "type": "string", "description": "verified, reported, pending, referencial" },
+        "location": { "type": "string", "description": "Mercado o tienda en Huánuco" },
+        "createdAt": { "type": "string", "description": "Fecha de registro ISO" }
+      }
+    },
+    "FuelStation": {
+      "fields": {
+        "id": { "type": "string", "description": "Identificador de la estación" },
+        "name": { "type": "string", "description": "Nombre comercial del grifo" },
+        "brand": { "type": "string", "description": "Marca" },
+        "address": { "type": "string", "description": "Dirección verificable en Huánuco" },
+        "district": { "type": "string", "description": "Distrito" },
+        "gas90": { "type": "number", "description": "Precio Gasolina 90" },
+        "gas95": { "type": "number", "description": "Precio Gasolina 95" },
+        "diesel": { "type": "number", "description": "Precio Diésel B5" },
+        "glp": { "type": "number", "description": "Precio GLP vehicular" },
+        "source": { "type": "string", "description": "OSINERGMIN Facilito o Reporte" },
+        "sourceUrl": { "type": "string", "description": "URL de la fuente" },
+        "updatedAt": { "type": "string", "description": "Fecha y hora de actualización" },
+        "verificationStatus": { "type": "string", "description": "verified o reported" }
+      }
+    },
+    "Offer": {
+      "fields": {
+        "id": { "type": "string", "description": "Identificador de la oferta" },
+        "product": { "type": "string", "description": "Nombre del producto" },
+        "store": { "type": "string", "description": "Tienda en Huánuco" },
+        "oldPrice": { "type": "number", "description": "Precio regular anterior" },
+        "currentPrice": { "type": "number", "description": "Precio en oferta" },
+        "discountPercentage": { "type": "number", "description": "Porcentaje calculado automáticamente" },
+        "validFrom": { "type": "string", "description": "Fecha de inicio" },
+        "validUntil": { "type": "string", "description": "Fecha de caducidad" },
+        "source": { "type": "string", "description": "Fuente verificable" },
+        "sourceUrl": { "type": "string", "description": "Enlace o catálogo oficial" },
+        "verificationStatus": { "type": "string", "description": "verified o pending" },
+        "updatedAt": { "type": "string", "description": "Fecha de actualización" }
+      }
+    },
+    "PriceReport": {
+      "fields": {
+        "id": { "type": "string", "description": "Identificador del reporte ciudadano" },
+        "type": { "type": "string", "description": "price u offer" },
+        "product": { "type": "string", "description": "Producto reportado" },
+        "price": { "type": "number", "description": "Precio observado" },
+        "storeName": { "type": "string", "description": "Establecimiento" },
+        "district": { "type": "string", "description": "Distrito de Huánuco" },
+        "location": { "type": "string", "description": "Ubicación o referencia" },
+        "status": { "type": "string", "description": "pending, verified, rejected" },
+        "comment": { "type": "string", "description": "Comentario del usuario" },
+        "createdAt": { "type": "string", "description": "Timestamp ISO" }
+      }
+    },
+    "NewsItem": {
+      "fields": {
+        "id": { "type": "string", "description": "Identificador determinístico de la noticia" },
+        "title": { "type": "string", "description": "Titular original de la noticia" },
+        "summary": { "type": "string", "description": "Resumen limpio de la noticia" },
+        "url": { "type": "string", "description": "Enlace directo a la fuente periodística original" },
+        "imageUrl": { "type": "string", "description": "URL de la imagen de la noticia" },
+        "sourceId": { "type": "string", "description": "ID de la fuente configurada" },
+        "sourceName": { "type": "string", "description": "Nombre del medio original" },
+        "publishedAt": { "type": "string", "description": "Fecha de publicación ISO" },
+        "fetchedAt": { "type": "string", "description": "Fecha de sincronización ISO" },
+        "category": { "type": "string", "description": "Categoría temática" },
+        "primaryLocation": { "type": "string", "description": "Provincia o distrito principal de Huánuco" }
+      }
+    },
+    "SiteStats": {
+      "fields": {
+        "id": { "type": "string", "description": "Identificador de métricas (ej. global)" },
+        "totalVisits": { "type": "number", "description": "Contador acumulado de visitas de usuarios" },
+        "todayVisits": { "type": "number", "description": "Visitas del día actual" },
+        "installedApps": { "type": "number", "description": "Total de usuarios que han instalado la aplicación PWA" },
+        "registeredUsers": { "type": "number", "description": "Total de usuarios registrados en el sistema" },
+        "lastDate": { "type": "string", "description": "Fecha del último conteo YYYY-MM-DD" },
+        "updatedAt": { "type": "string", "description": "Fecha y hora de última visita ISO" }
+      }
+    },
+    "UserProfile": {
+      "fields": {
+        "registeredAt": { "type": "string", "description": "Fecha de registro ISO" }
+      }
+    }
+  },
+  "firestore": {
+    "collections": {
+      "products": { "entity": "Product" },
+      "fuelStations": { "entity": "FuelStation" },
+      "offers": { "entity": "Offer" },
+      "priceReports": { "entity": "PriceReport" },
+      "news": { "entity": "NewsItem" },
+      "stats": { "entity": "SiteStats" },
+      "users": { "entity": "UserProfile" }
+    }
+  }
+}

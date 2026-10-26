@@ -1,0 +1,65 @@
+{
+  "id": "/",
+  "name": "NotiPerúx - Noticias del Perú y el Mundo",
+  "short_name": "NotiPerúx",
+  "description": "El Diario de Mayor Circulación Informativa del Perú. Noticias verificadas del Perú y el Mundo en tiempo real.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "lang": "es-PE",
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "categories": ["news", "magazines", "utilities"],
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Noticias del Perú",
+      "short_name": "Perú",
+      "description": "Principales noticias nacionales verificadas",
+      "url": "/?tab=peru",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Noticias del Mundo",
+      "short_name": "Mundo",
+      "description": "Noticias internacionales y corresponsalía global",
+      "url": "/?tab=internacional",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Kiosko de Diarios",
+      "short_name": "Kiosko",
+      "description": "Portadas de los principales diarios impresos",
+      "url": "/?tab=kiosko",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ]
+}

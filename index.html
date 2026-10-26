@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <script>
+      (function () {
+        if (typeof window.__deferredPwaPrompt === 'undefined') {
+          window.__deferredPwaPrompt = null;
+        }
+        if (typeof window.__isPwaInstalled === 'undefined') {
+          window.__isPwaInstalled = false;
+        }
+        try {
+          if (
+            window.matchMedia('(display-mode: standalone)').matches ||
+            window.navigator.standalone === true
+          ) {
+            window.__isPwaInstalled = true;
+          }
+        } catch (e) {}
+
+        window.__refreshPwaManifest = function () {
+          try {
+            var link = document.getElementById('pwa-manifest-link');
+            if (link && !window.__deferredPwaPrompt && !window.__isPwaInstalled) {
+              link.setAttribute('href', '/manifest.json?v=' + Date.now());
+            }
+          } catch (e) {}
+        };
+
+        window.addEventListener('beforeinstallprompt', function (event) {
+          event.preventDefault();
+          window.__deferredPwaPrompt = event;
+          window.__isPwaInstalled = false;
+          try {
+            localStorage.removeItem('notiperux_pwa_installed');
+          } catch (e) {}
+          window.dispatchEvent(new CustomEvent('pwa:beforeinstallprompt'));
+        });
+
+        window.addEventListener('appinstalled', function () {
+          window.__deferredPwaPrompt = null;
+          window.__isPwaInstalled = true;
+          try {
+            localStorage.setItem('notiperux_pwa_installed', '1');
+          } catch (e) {}
+          window.dispatchEvent(new CustomEvent('pwa:appinstalled'));
+        });
+
+        window.addEventListener('unhandledrejection', function (event) {
+          if (
+            event &&
+            event.reason &&
+            (String(event.reason).indexOf('ServiceWorker') !== -1 ||
+              (event.reason.message && event.reason.message.indexOf('ServiceWorker') !== -1))
+          ) {
+            event.preventDefault();
+          }
+        });
+
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', function () {
+            navigator.serviceWorker
+              .register('/sw.js', { scope: '/' })
+              .then(function (reg) {
+                if (reg && typeof reg.update === 'function') {
+                  reg.update().catch(function () {});
+                }
+
+                // Chequeo periódico cada 10 minutos
+                setInterval(function () {
+                  if (reg && typeof reg.update === 'function') {
+                    reg.update().catch(function () {});
+                  }
+                }, 10 * 60 * 1000);
+
+                // Chequear actualización al volver a la app o desbloquear el móvil
+                document.addEventListener('visibilitychange', function () {
+                  if (document.visibilityState === 'visible' && reg && typeof reg.update === 'function') {
+                    reg.update().catch(function () {});
+                  }
+                });
+              })
+              .catch(function () {});
+          });
+        }
+      })();
+    </script>
+    <title>NotiperuX - Noticias de Perú y el Mundo</title>
+    <meta name="description" content="Todas las noticias del Perú y del mundo, en audio y escrito en una sola web." />
+    <meta name="keywords" content="NotiPerúx, Noticias Perú, Noticias del Mundo, Actualidad Perú, Noticias hoy, RPP, El Comercio, La República, Andina, Últimas noticias Perú" />
+    <meta name="author" content="NotiperuX" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Canonical & SEO -->
+    <link rel="canonical" href="https://www.notiperux.com/" />
+
+    <!-- Google AdSense -->
+    <meta name="google-adsense-account" content="ca-pub-3994399165136183" />
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3994399165136183"
+         crossorigin="anonymous"></script>
+
+    <!-- Open Graph / Facebook / WhatsApp Preview -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="NotiperuX" />
+    <meta property="og:url" content="https://www.notiperux.com/" />
+    <meta property="og:title" content="NotiperuX - Noticias de Perú y el Mundo" />
+    <meta property="og:description" content="Todas las noticias del Perú y del mundo, en audio y escrito en una sola web." />
+    <meta property="og:image" content="https://www.notiperux.com/og-image.jpg" />
+    <meta property="og:image:secure_url" content="https://www.notiperux.com/og-image.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="NotiperuX - Portada oficial" />
+    <meta property="og:locale" content="es_PE" />
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="NotiperuX - Noticias de Perú y el Mundo" />
+    <meta name="twitter:description" content="Todas las noticias del Perú y del mundo, en audio y escrito en una sola web." />
+    <meta name="twitter:image" content="https://www.notiperux.com/og-image.jpg" />
+    <meta name="twitter:image:alt" content="NotiperuX - Portada oficial" />
+
+    <!-- PWA & Mobile Web App Meta Tags -->
+    <link id="pwa-manifest-link" rel="manifest" href="/manifest.json?v=20261016" />
+    <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="NotiPerúx" />
+    <meta name="application-name" content="NotiPerúx" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- Fonts: Plus Jakarta Sans for clean legibility -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+
+    <!-- Schema.org JSON-LD structured data (Google News & AdSense E-E-A-T Verified) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "NewsMediaOrganization",
+      "name": "NotiPerúx",
+      "alternateName": ["NotiPerúx", "NotiperuX", "El Diario de Mayor Circulación Informativa del Perú"],
+      "url": "https://www.notiperux.com/",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://www.notiperux.com/icon-512x512.png",
+        "width": 512,
+        "height": 512
+      },
+      "description": "NotiPerúx: El Diario de Mayor Circulación Informativa del Perú. Cobertura de noticias verificadas de Perú y el Mundo en tiempo real.",
+      "publishingPrinciples": "https://www.notiperux.com/quienes-somos",
+      "correctionsPolicy": "https://www.notiperux.com/contacto",
+      "privacyPolicy": "https://www.notiperux.com/politica-de-privacidad",
+      "termsOfService": "https://www.notiperux.com/terminos",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Huánuco",
+        "addressRegion": "Huánuco",
+        "addressCountry": "PE"
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "editorial",
+        "email": "contacto@notiperux.com",
+        "availableLanguage": ["Spanish"]
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://www.notiperux.com/?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      },
+      "areaServed": {
+        "@type": "Country",
+        "name": "Perú"
+      }
+    }
+    </script>
+  </head>
+  <body class="bg-black text-white antialiased selection:bg-white selection:text-black">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

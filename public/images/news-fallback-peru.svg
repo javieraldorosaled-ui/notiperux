@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450" fill="none">
+  <defs>
+    <linearGradient id="bgPeru" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#143D28"/>
+      <stop offset="50%" stop-color="#1B5E20"/>
+      <stop offset="100%" stop-color="#0E281A"/>
+    </linearGradient>
+    <linearGradient id="flagRed" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#D32F2F"/>
+      <stop offset="100%" stop-color="#B71C1C"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#bgPeru)"/>
+  <circle cx="400" cy="210" r="140" fill="#ffffff" fill-opacity="0.04"/>
+  <circle cx="400" cy="210" r="100" fill="#ffffff" fill-opacity="0.06"/>
+  <!-- Decorative badge -->
+  <g transform="translate(350, 150)">
+    <rect x="-10" y="-10" width="120" height="80" rx="12" fill="#0D2E1B" stroke="#4CAF50" stroke-width="2" stroke-opacity="0.4"/>
+    <!-- Newspaper icon -->
+    <path d="M16 12h56M16 26h56M16 40h36" stroke="#C8E6C9" stroke-width="5" stroke-linecap="round"/>
+    <rect x="62" y="34" width="22" height="18" rx="3" fill="#81C784"/>
+  </g>
+  <!-- Flag strip accent -->
+  <rect x="360" y="255" width="24" height="6" rx="2" fill="url(#flagRed)"/>
+  <rect x="388" y="255" width="24" height="6" rx="2" fill="#FFFFFF"/>
+  <rect x="416" y="255" width="24" height="6" rx="2" fill="url(#flagRed)"/>
+  <!-- Text -->
+  <text x="400" y="295" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="700" fill="#FFFFFF" text-anchor="middle" letter-spacing="1">NOTICIAS DEL PERÚ</text>
+  <text x="400" y="325" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="500" fill="#A5D6A7" text-anchor="middle" letter-spacing="0.5">ACTUALIDAD NACIONAL · FUENTE VERIFICADA</text>
+</svg>
