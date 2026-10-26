@@ -3,6 +3,7 @@ import { RefreshCw, Newspaper, Globe, Flame, ShieldCheck } from 'lucide-react';
 import { NewsItem } from '../types';
 import { NewsCard } from './NewsCard';
 import { formatRelativeTime } from '../services/firebase';
+import { ShareSiteButton } from './ShareSiteButton';
 
 export interface InternationalNewsViewProps {
   news: NewsItem[];
@@ -10,6 +11,7 @@ export interface InternationalNewsViewProps {
   onSelectNews: (newsId: string) => void;
   onRefresh?: () => void;
   lastUpdated?: string | null;
+  onNotify?: (text: string, type?: 'success' | 'error') => void;
 }
 
 export const InternationalNewsView: React.FC<InternationalNewsViewProps> = ({
@@ -18,6 +20,7 @@ export const InternationalNewsView: React.FC<InternationalNewsViewProps> = ({
   onSelectNews,
   onRefresh,
   lastUpdated,
+  onNotify,
 }) => {
   // Filtrar exclusivamente noticias internacionales
   const intlNews = useMemo(() => {
@@ -41,9 +44,12 @@ export const InternationalNewsView: React.FC<InternationalNewsViewProps> = ({
             <span>CABLES DIPLOMÁTICOS VERIFICADOS</span>
           </div>
 
-          <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black text-white tracking-tighter uppercase leading-none select-none cursor-pointer">
-            NOTIPERUX MUNDO
-          </h1>
+          <div className="flex flex-wrap items-center justify-center gap-x-2 sm:gap-x-3 gap-y-1">
+            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white tracking-tighter uppercase leading-none select-none cursor-pointer">
+              NOTIPERUX MUNDO
+            </h1>
+            <ShareSiteButton onNotify={onNotify} />
+          </div>
           <div className="border-y-double border-y-4 border-white py-1.5 text-[12px] sm:text-[14px] font-black uppercase tracking-[0.25em] text-white">
             CORRESPONSALÍA GLOBAL • LA INFORMACIÓN SIN FRONTERAS
           </div>

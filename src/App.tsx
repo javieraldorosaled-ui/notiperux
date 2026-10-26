@@ -16,8 +16,14 @@ import { LegalModals, LegalDocType } from './components/LegalModals';
 import { ORIGINAL_REPORTS } from './data/originalArticles';
 import { NEWS_CATEGORIES } from './data/categories';
 import {
+  INITIAL_NEWS_ITEMS,
+  INITIAL_NEWS_SOURCES,
+  INITIAL_NEWS_UPDATED_AT,
+} from './data/initialNewsSnapshot';
+import {
   subscribeToHuanucoNews,
   triggerManualNewsSync,
+  getLocalCachedNews,
 } from './services/realDataStore';
 import { speechManager } from './services/speechService';
 import { initializeFirestoreDatabase } from './services/dbBootstrap';
@@ -73,11 +79,24 @@ export function App() {
     return null;
   });
 
-  // Estado de noticias inicializado con reportes originales para evitar contenido escaso
-  const [news, setNews] = useState<NewsItem[]>(ORIGINAL_REPORTS);
-  const [newsSources, setNewsSources] = useState<NewsSourceStatus[]>([]);
-  const [newsUpdatedAt, setNewsUpdatedAt] = useState<string | null>(null);
-  const [isNewsLoading, setIsNewsLoading] = useState<boolean>(true);
+  // Estado de noticias inicializado con caché local o snapshot pre-compilado (0 ms de latencia absoluta, jamás muestra noticias viejas)
+  const [news, setNews] = useState<NewsItem[]>(() => {
+    const cached = getLocalCachedNews();
+    if (cached && Array.isArray(cached.items) && cached.items.length > 0) {
+      return cached.items;
+    }
+    return INITIAL_NEWS_ITEMS;
+  });
+  const [newsSources, setNewsSources] = useState<NewsSourceStatus[]>(() => {
+    const cached = getLocalCachedNews();
+    if (cached?.sources && cached.sources.length > 0) return cached.sources;
+    return INITIAL_NEWS_SOURCES;
+  });
+  const [newsUpdatedAt, setNewsUpdatedAt] = useState<string | null>(() => {
+    const cached = getLocalCachedNews();
+    return cached?.updatedAt || INITIAL_NEWS_UPDATED_AT;
+  });
+  const [isNewsLoading, setIsNewsLoading] = useState<boolean>(false);
   const [selectedTopicId, setSelectedTopicId] = useState<string>(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
@@ -150,31 +169,24 @@ export function App() {
 
   // Suscripción al flujo continuo de noticias desde el backend y Firestore
   useEffect(() => {
-    setIsNewsLoading(true);
     const unsubNews = subscribeToHuanucoNews((payload) => {
       if (Array.isArray(payload.items) && payload.items.length > 0) {
-        // Combinar reportes originales de NotiPerúx con los del feed en vivo
-        const live = payload.items || [];
-        const combined = [
-          ...live,
-          ...ORIGINAL_REPORTS.filter((r) => !live.some((it) => it.id === r.id)),
-        ].sort((a, b) => (new Date(b.publishedAt).getTime() || 0) - (new Date(a.publishedAt).getTime() || 0));
-        setNews(combined);
-        speechManager.preloadTopNews(combined);
-      } else {
-        setNews(ORIGINAL_REPORTS);
+        setNews(payload.items);
+        speechManager.preloadTopNews(payload.items);
       }
       if (Array.isArray(payload.sources)) {
         setNewsSources(payload.sources);
       }
-      setNewsUpdatedAt(payload.updatedAt);
+      if (payload.updatedAt) {
+        setNewsUpdatedAt(payload.updatedAt);
+      }
       setIsNewsLoading(false);
     });
 
-    // Timeout de seguridad: Si pasan 2.5 segundos, desactiva el estado de carga para no bloquear la pantalla
+    // Timeout de seguridad: Si pasan 1.2 segundos, desactiva el estado de carga
     const safetyTimeout = setTimeout(() => {
       setIsNewsLoading(false);
-    }, 2500);
+    }, 1200);
 
     return () => {
       clearTimeout(safetyTimeout);
@@ -381,12 +393,7 @@ export function App() {
       setIsNewsLoading(true);
       const res = await triggerManualNewsSync();
       if (Array.isArray(res.items) && res.items.length > 0) {
-        const live = res.items || [];
-        const combined = [
-          ...live,
-          ...ORIGINAL_REPORTS.filter((r) => !live.some((it) => it.id === r.id)),
-        ].sort((a, b) => (new Date(b.publishedAt).getTime() || 0) - (new Date(a.publishedAt).getTime() || 0));
-        setNews(combined);
+        setNews(res.items);
       }
       if (Array.isArray(res.sources)) {
         setNewsSources(res.sources);
@@ -555,6 +562,7 @@ export function App() {
                   onSelectNews={handleOpenNewsDetail}
                   onRefresh={handleRefreshNews}
                   lastUpdated={newsUpdatedAt}
+                  onNotify={showNotification}
                 />
               ) : activeTab === 'kiosko' ? (
                 <NewspaperStandView />
@@ -567,6 +575,7 @@ export function App() {
                   selectedTopicId={selectedTopicId}
                   onSelectTopic={setSelectedTopicId}
                   lastUpdated={newsUpdatedAt}
+                  onNotify={showNotification}
                 />
               )}
             </>

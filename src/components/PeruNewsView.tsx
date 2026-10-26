@@ -16,6 +16,7 @@ import { NewsCard } from './NewsCard';
 import { ORIGINAL_REPORTS } from '../data/originalArticles';
 import { NEWS_CATEGORIES, NewsCategoryDef } from '../data/categories';
 import { formatRelativeTime } from '../services/firebase';
+import { ShareSiteButton } from './ShareSiteButton';
 
 export interface PeruNewsViewProps {
   news: NewsItem[];
@@ -26,6 +27,7 @@ export interface PeruNewsViewProps {
   onSelectTopic?: (topicId: string) => void;
   totalVisits?: number;
   lastUpdated?: string | null;
+  onNotify?: (text: string, type?: 'success' | 'error') => void;
 }
 
 export interface TopicDef {
@@ -89,6 +91,7 @@ export const PeruNewsView: React.FC<PeruNewsViewProps> = ({
   selectedTopicId: propSelectedTopicId,
   onSelectTopic,
   lastUpdated,
+  onNotify,
 }) => {
   const [internalTopicId, setInternalTopicId] = useState<string>('todas');
   const selectedTopicId = propSelectedTopicId ?? internalTopicId;
@@ -96,9 +99,11 @@ export const PeruNewsView: React.FC<PeruNewsViewProps> = ({
 
   // Filtrar exclusivamente noticias peruanas, ordenadas cronológicamente
   const allPeruNews = useMemo(() => {
-    const livePeru = news.filter((n) => n.section === "peru" && !ORIGINAL_REPORTS.some((r) => r.id === n.id));
-    const combined = [...livePeru, ...ORIGINAL_REPORTS];
-    return combined.sort((a, b) => {
+    const livePeru = news.filter((n) => n.section === "peru");
+    if (livePeru.length === 0) {
+      return ORIGINAL_REPORTS;
+    }
+    return livePeru.sort((a, b) => {
       const timeA = new Date(a.publishedAt).getTime() || 0;
       const timeB = new Date(b.publishedAt).getTime() || 0;
       return timeB - timeA;
@@ -134,9 +139,12 @@ export const PeruNewsView: React.FC<PeruNewsViewProps> = ({
             <span>VERIFICACIÓN EN TIEMPO REAL</span>
           </div>
 
-          <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black text-white tracking-tighter uppercase leading-none select-none cursor-pointer">
-            NOTIPERUX
-          </h1>
+          <div className="flex flex-wrap items-center justify-center gap-x-2 sm:gap-x-3 gap-y-1">
+            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white tracking-tighter uppercase leading-none select-none cursor-pointer">
+              NOTIPERUX
+            </h1>
+            <ShareSiteButton onNotify={onNotify} />
+          </div>
           <div className="border-y-double border-y-4 border-white py-1.5 text-[12px] sm:text-[14px] font-black uppercase tracking-[0.25em] text-white">
             EL DIARIO DE MAYOR CIRCULACIÓN INFORMATIVA DEL PERÚ
           </div>

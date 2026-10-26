@@ -34,6 +34,7 @@ export const NewsCard: React.FC<NewsCardProps> = ({
   className = '',
 }) => {
   const [imgLoadStage, setImgLoadStage] = useState<'initial' | 'proxy' | 'fallback'>('initial');
+  const [isImageLoaded, setIsImageLoaded] = useState<boolean>(false);
   const [speechState, setSpeechState] = useState<SpeechState>('idle');
 
   useEffect(() => {
@@ -202,8 +203,10 @@ export const NewsCard: React.FC<NewsCardProps> = ({
             src={displayImage}
             alt={titleClean}
             loading="eager"
+            decoding="async"
+            onLoad={() => setIsImageLoaded(true)}
             onError={handleImageError}
-            className="w-full h-full object-cover transition-all duration-700"
+            className={`w-full h-full object-cover transition-opacity duration-300 ${isImageLoaded ? "opacity-100" : "opacity-90"}`}
           />
           
           <div className="absolute bottom-0 left-0 bg-black/75 backdrop-blur-xs px-2.5 py-1 text-[11px] text-white font-black uppercase tracking-[0.15em] border-t border-r border-white/20">

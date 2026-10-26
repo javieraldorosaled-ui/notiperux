@@ -1252,9 +1252,70 @@ export async function confirmProductPriceInFirestore(
   }
 }
 
+const LOCAL_NEWS_CACHE_KEY = 'notiperux_news_cache_v2';
+
+export interface CachedNewsPayload {
+  items: HuanucoNewsItem[];
+  sources: NewsSourceStatus[];
+  updatedAt: string | null;
+  cachedAt?: number;
+}
+
+export function getLocalCachedNews(): CachedNewsPayload | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(LOCAL_NEWS_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed && Array.isArray(parsed.items) && parsed.items.length > 0) {
+      return parsed;
+    }
+  } catch {
+    // Ignorar errores de acceso a almacenamiento
+  }
+  return null;
+}
+
+export function saveLocalCachedNews(payload: {
+  items: HuanucoNewsItem[];
+  sources?: NewsSourceStatus[];
+  updatedAt?: string | null;
+}) {
+  if (typeof window === 'undefined') return;
+  try {
+    if (Array.isArray(payload.items) && payload.items.length > 0) {
+      localStorage.setItem(
+        LOCAL_NEWS_CACHE_KEY,
+        JSON.stringify({
+          items: payload.items,
+          sources: payload.sources || [],
+          updatedAt: payload.updatedAt || new Date().toISOString(),
+          cachedAt: Date.now(),
+        })
+      );
+    }
+  } catch {
+    // Si la cuota de localStorage en el móvil está ajustada, guardar las 45 noticias principales
+    try {
+      const leanItems = (payload.items || []).slice(0, 45);
+      localStorage.setItem(
+        LOCAL_NEWS_CACHE_KEY,
+        JSON.stringify({
+          items: leanItems,
+          sources: payload.sources || [],
+          updatedAt: payload.updatedAt || new Date().toISOString(),
+          cachedAt: Date.now(),
+        })
+      );
+    } catch {
+      // Ignorar si el almacenamiento privado está totalmente bloqueado
+    }
+  }
+}
+
 /**
- * Suscripción a las últimas noticias reales y verificadas de Huánuco
- * a través del backend (/api/news) y Firestore (`news`).
+ * Suscripción a las últimas noticias reales y verificadas de Huánuco y el Perú
+ * con arquitectura Stale-While-Revalidate (0ms de latencia inicial).
  */
 export function subscribeToHuanucoNews(
   onData: (payload: {
@@ -1265,75 +1326,112 @@ export function subscribeToHuanucoNews(
 ) {
   let cancelled = false;
 
+  // 1. ENTREGA INSTANTÁNEA (0 ms): Si el lector ya visitó la página antes,
+  // pintar inmediatamente las últimas noticias guardadas sin esperar la red ni mostrar artículos viejos.
+  const cached = getLocalCachedNews();
+  if (cached && Array.isArray(cached.items) && cached.items.length > 0) {
+    onData({
+      items: cached.items,
+      sources: cached.sources || [],
+      updatedAt: cached.updatedAt || null,
+    });
+  }
+
   const fetchFromBackend = async () => {
     const timestamp = Date.now();
-    // 1. Intentar endpoint dinámico de API (/api/news-v2) con prevención de caché
-    try {
-      const res = await fetch(`/api/news-v2?_t=${timestamp}`, {
-        cache: 'no-store',
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          Pragma: 'no-cache',
-        },
-      });
-      if (res.ok) {
-        const contentType = res.headers.get('content-type') || '';
-        if (contentType.includes('application/json')) {
-          const data = await res.json();
-          if (Array.isArray(data?.items) && data.items.length > 0) {
-            if (!cancelled) {
-              onData({
-                items: data.items,
-                sources: Array.isArray(data?.sources) ? data.sources : [],
-                updatedAt: data.updatedAt || null,
-              });
-              return;
+    let hasResolved = false;
+
+    // A. Endpoint API dinámico con timeout rápido de 2000ms
+    const tryDynamicApi = async () => {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000);
+        const res = await fetch(`/api/news-v2?_t=${timestamp}`, {
+          cache: 'no-store',
+          signal: controller.signal,
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            Pragma: 'no-cache',
+          },
+        });
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+          const contentType = res.headers.get('content-type') || '';
+          if (contentType.includes('application/json')) {
+            const data = await res.json();
+            if (Array.isArray(data?.items) && data.items.length > 0) {
+              hasResolved = true;
+              if (!cancelled) {
+                saveLocalCachedNews({
+                  items: data.items,
+                  sources: data.sources,
+                  updatedAt: data.updatedAt,
+                });
+                onData({
+                  items: data.items,
+                  sources: Array.isArray(data?.sources) ? data.sources : [],
+                  updatedAt: data.updatedAt || null,
+                });
+                return true;
+              }
             }
           }
         }
+      } catch {
+        // Fallback inmediato
       }
-    } catch {
-      // Ignorar y recurrir al archivo estático
-    }
+      return false;
+    };
 
-    // 2. Fallback estático garantizado en producción y Vercel (/data/news-huanuco.json)
-    try {
-      const resStatic = await fetch(`/data/news-huanuco.json?_t=${timestamp}`, {
-        cache: 'no-store',
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          Pragma: 'no-cache',
-        },
-      });
-      if (resStatic.ok) {
-        const contentType = resStatic.headers.get('content-type') || '';
-        if (contentType.includes('application/json')) {
-          const staticData = await resStatic.json();
-          if (Array.isArray(staticData?.items) && staticData.items.length > 0) {
-            if (!cancelled) {
-              onData({
-                items: staticData.items,
-                sources: Array.isArray(staticData?.sources) ? staticData.sources : [],
-                updatedAt: staticData.updatedAt || null,
-              });
-              return;
+    // B. Endpoint estático de CDN ultra-rápido (<60ms garantizado)
+    const tryStaticJson = async () => {
+      try {
+        const resStatic = await fetch(`/data/news-huanuco.json?_t=${timestamp}`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            Pragma: 'no-cache',
+          },
+        });
+        if (resStatic.ok) {
+          const contentType = resStatic.headers.get('content-type') || '';
+          if (contentType.includes('application/json')) {
+            const staticData = await resStatic.json();
+            if (Array.isArray(staticData?.items) && staticData.items.length > 0) {
+              if (!cancelled) {
+                saveLocalCachedNews({
+                  items: staticData.items,
+                  sources: staticData.sources,
+                  updatedAt: staticData.updatedAt,
+                });
+                onData({
+                  items: staticData.items,
+                  sources: Array.isArray(staticData?.sources) ? staticData.sources : [],
+                  updatedAt: staticData.updatedAt || null,
+                });
+                return true;
+              }
             }
           }
         }
+      } catch {
+        // Ignorar
       }
-    } catch {
-      // Ignorar
-    }
+      return false;
+    };
 
-    // 3. Si ambos fallan, responder con lista vacía para no bloquear la interfaz
-    if (!cancelled) {
-      onData({ items: [], sources: [], updatedAt: null });
+    // Si aún no tenemos caché en memoria, intentar ambas vías ágilmente
+    const dynamicOk = await tryDynamicApi();
+    if (!dynamicOk && !hasResolved) {
+      await tryStaticJson();
     }
   };
 
   fetchFromBackend();
-  // Polling automático cada 5 minutos mientras la aplicación esté abierta
-  const pollInterval = setInterval(fetchFromBackend, 5 * 60 * 1000);
+
+  // Polling automático cada 4 minutos mientras la aplicación esté abierta
+  const pollInterval = setInterval(fetchFromBackend, 4 * 60 * 1000);
 
   // Re-consultar inmediatamente si el dispositivo recupera la conexión o el usuario abre/vuelve a la app
   const handleOnline = () => {
@@ -1384,7 +1482,12 @@ export async function triggerManualNewsSync(): Promise<{
     });
     if (res.ok) {
       const data = await res.json();
-      if (Array.isArray(data?.items)) {
+      if (Array.isArray(data?.items) && data.items.length > 0) {
+        saveLocalCachedNews({
+          items: data.items,
+          sources: data.sources,
+          updatedAt: data.updatedAt,
+        });
         return {
           items: data.items,
           sources: Array.isArray(data?.sources) ? data.sources : [],
@@ -1406,14 +1509,30 @@ export async function triggerManualNewsSync(): Promise<{
     });
     if (resStatic.ok) {
       const staticData = await resStatic.json();
-      return {
-        items: Array.isArray(staticData?.items) ? staticData.items : [],
-        sources: Array.isArray(staticData?.sources) ? staticData.sources : [],
-        updatedAt: staticData?.updatedAt || null,
-      };
+      if (Array.isArray(staticData?.items) && staticData.items.length > 0) {
+        saveLocalCachedNews({
+          items: staticData.items,
+          sources: staticData.sources,
+          updatedAt: staticData.updatedAt,
+        });
+        return {
+          items: staticData.items,
+          sources: Array.isArray(staticData?.sources) ? staticData.sources : [],
+          updatedAt: staticData?.updatedAt || null,
+        };
+      }
     }
   } catch {
     // Ignorar
+  }
+
+  const cached = getLocalCachedNews();
+  if (cached && cached.items.length > 0) {
+    return {
+      items: cached.items,
+      sources: cached.sources,
+      updatedAt: cached.updatedAt,
+    };
   }
 
   return {

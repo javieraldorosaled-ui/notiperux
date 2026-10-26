@@ -4410,7 +4410,8 @@ app.get('/api/news-v2', async (req, res) => {
     const updatedMs = state.updatedAt ? Date.parse(state.updatedAt) : 0;
     const isStale = !updatedMs || isNaN(updatedMs) || Date.now() - updatedMs > NEWS_AUTO_REFRESH_MS;
 
-    if ((state.items.length === 0 || isStale) && !isNewsSyncRunning) {
+    // Si no hay ninguna noticia en la base de datos, esperar la primera sincronización
+    if (state.items.length === 0 && !isNewsSyncRunning) {
       const fresh = await runOrReuseHuanucoNewsSync(false);
       return res.status(200).json({
         status: fresh.items.length > 0 ? 'OK' : 'EMPTY',
@@ -4418,6 +4419,16 @@ app.get('/api/news-v2', async (req, res) => {
         count: fresh.items.length,
         sources: fresh.sources,
         items: fresh.items,
+      });
+    }
+
+    // PATRÓN STALE-WHILE-REVALIDATE:
+    // Si ya hay noticias en memoria/Firestore pero pasó el intervalo de refresco,
+    // devolver INMEDIATAMENTE (<10ms) el contenido existente para que el usuario no espere 4 segundos,
+    // y disparar la revalidación de fuentes RSS en segundo plano.
+    if (isStale && !isNewsSyncRunning) {
+      runOrReuseHuanucoNewsSync(false).catch((err) => {
+        console.warn('[NewsEngine SWR Background]', err);
       });
     }
 
